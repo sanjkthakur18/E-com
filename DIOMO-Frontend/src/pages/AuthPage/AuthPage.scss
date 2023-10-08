@@ -1,0 +1,152 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --color-131921: #131921;
+    --color-3b4149: #3b4149;
+    --color-febd69: #febd69;
+    --color-232f3e: #232f3e;
+    --color-bf4800: #bf4800;
+    --color-f5f5f7: #f5f5f7;
+    --color-ededed: #ededed;
+    --color-777777: #777777;
+    --color-1c1c1b: #1c1c1b;
+    --color-212529: #212529;
+    --color-ffd333: #ffd333;
+    --color-47ad24: #47ad24;
+    --color-e52e2e: #e52e2e;
+    --color-828599: #828599;
+    --color-3d464d: #ed464d;
+    --color-c3d4da: #ced4da;
+}
+
+a {
+    text-decoration: none;
+    display: inline-block;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: inherit;
+}
+
+.gap-5 {
+    gap: 5px;
+}
+
+.gap-10 {
+    gap: 10px;
+}
+
+.gap-15 {
+    gap: 15px;
+}
+
+.gap-20 {
+    gap: 20px;
+}
+
+.gap-25 {
+    gap: 25px;
+}
+
+.gap-30 {
+    gap: 30px;
+}
+
+.button {
+    color: white;
+    background-color: var(--color-232f3e);
+    font-size: 14px;
+    padding: 13px 33px;
+    border-radius: 25px;
+}
+
+.button:hover {
+    background-color: #F94E30;
+    color: var(--color-c3d4da);
+}
+
+.home-wrapper-2 {
+    background-color: var(--color-f5f5f7);
+}
+
+.auth-card {
+    padding: 20px;
+    background-color: white;
+    width: 500px;
+    margin: 30px auto;
+    border-radius: 10px;
+}
+
+.auth-card h3 {
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--color-777777);
+}
+
+.auth-card p {
+    font-size: 13px;
+    color: var(--color-777777);
+}
+
+.auth-card .form-control {
+    height: 50px;
+    background-color: var(--color-f5f5f7);
+    color: var(--color-777777);
+    font-size: 14px;
+    border-radius: 10px;
+    border-color: transparent;
+}
+
+.auth-card a {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-1c1c1b);
+}
+
+.signup {
+    background-color: #e52e2e;
+    color: var(--color-c3d4da);
+    border: none;
+}
+
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.auth-buttons>div {
+    margin-top: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.password-input {
+    margin-top: 10px;
+}
+
+.button-signup{
+    margin-top: 5px;;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+.signup:hover {
+    background-color: var(--color-131921);
+    color: white;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }

@@ -1,0 +1,27 @@
+
+const initialState = {
+    token: null,
+    user: null,
+    userStatus: STATUS.IDLE,
+    isLoggedIn: false,
+};
+
+const authSlice = createSlice({
+    name: 'auth',
+    initialState,
+    reducers: {
+        setToken: (state, action) => {
+            state.token = action.payload;
+            state.isLoggedIn = true;
+        },
+        setUser: (state, action) => {
+            state.user = action.payload;
+        },
+        logout: (state) => {
+            state.token = null;
+            state.user = null;
+            state.isLoggedIn = false;
+        },
+    },
+    // ...
+});

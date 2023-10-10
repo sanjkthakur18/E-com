@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { BsFacebook, BsInstagram } from 'react-icons/bs';
-import { selectUserStatus } from '../../store/authSlice';
-import { STATUS } from '../../utils/status';
+// import { selectUserStatus, logoutUser, selectUser } from '../../store/authSlice';
+// import { STATUS } from '../../utils/status';
 import Navbar from "../Navbar/Navbar";
 import "./Header.scss";
 
 const Header = () => {
-  const userStatus = useSelector(selectUserStatus);
-  console.log(userStatus);
-  const firstName = localStorage.getItem('firstname');
+  // const dispatch = useDispatch();
+  // const navigate = useNavigate();
+  // const userStatus = useSelector(selectUserStatus);
+  // const user = useSelector(selectUser);
+  // const firstName = user?.firstname;
+
+  // const handleLogout = () => {
+  //   dispatch(logoutUser());
+  //   navigate('/');
+  // };
 
   return (
     <header className='header text-white'>
@@ -45,12 +52,12 @@ const Header = () => {
               </ul>
             </div>
             <div className='header-cnt-top-r'>
-              {userStatus === STATUS.SUCCEEDED ? (
+              {/* {userStatus === STATUS.SUCCEEDED ? (
                 <>
                   <span className='top-link-itm-txt'>{firstName}</span>
-                  {/* <button onClick={handleLogout}>Logout</button> */}
+                  <button onClick={handleLogout} className='fs-6 text-white mx-3'>Signout</button>
                 </>
-              ) : (
+              ) : ( */}
                 <ul className='top-links flex align-center'>
                   <li>
                     <Link to="/signup">
@@ -64,7 +71,7 @@ const Header = () => {
                     </Link>
                   </li>
                 </ul>
-              )}
+              {/* )} */}
             </div>
           </div>
           <div className='header-cnt-bottom'>

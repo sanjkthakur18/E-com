@@ -3,10 +3,12 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { AUTH_URL } from '../utils/apiURL';
 import { STATUS } from '../utils/status';
+// import { config } from '../utils/axiosConfig';
 
 export const registerUser = createAsyncThunk('auth/registerUser', async (formData) => {
     try {
         const response = await axios.post(`${AUTH_URL}users/register`, formData);
+        localStorage.setItem('user', response.data);
         return response.data;
     } catch (error) {
         console.log(error);
@@ -17,6 +19,8 @@ export const registerUser = createAsyncThunk('auth/registerUser', async (formDat
 export const loginUser = createAsyncThunk('auth/loginUser', async (formData) => {
     try {
         const response = await axios.post(`${AUTH_URL}users/login`, formData);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+        localStorage.setItem('firstname', response.data.firstname);
         console.log(response.data);
         return response.data;
     } catch (error) {
@@ -25,8 +29,19 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (formData) => 
     }
 });
 
+/* export const logoutUser = createAsyncThunk('auth/logoutUser', async () => {
+    try {
+        const response = await axios.get(`${AUTH_URL}users/logout`, config);
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}); */
+
 const initialState = {
-    users: [],
+    user: [],
     userStatus: STATUS.IDLE,
 };
 
@@ -40,7 +55,7 @@ const authSlice = createSlice({
                 state.userStatus = STATUS.LOADING;
             })
             .addCase(registerUser.fulfilled, (state, action) => {
-                state.users = action.payload;
+                state.user = action.payload;
                 state.userStatus = STATUS.SUCCEEDED;
                 toast.info('User Created Successfully.');
             })
@@ -52,26 +67,36 @@ const authSlice = createSlice({
                 state.userStatus = STATUS.LOADING;
             })
             .addCase(loginUser.fulfilled, (state, action) => {
-                state.users = action.payload;
+                state.user = action.payload;
                 state.userStatus = STATUS.SUCCEEDED;
                 if (state.userStatus === STATUS.SUCCEEDED) {
-                    localStorage.setItem('token', action.payload.token);
-                    localStorage.setItem('firstname', action.payload.firstname);
                     toast.info('Logged in successfully.');
                 }
             })
-            .addCase(loginUser.rejected, (state) => {
+            .addCase(loginUser.rejected, (state, action) => {
                 state.userStatus = STATUS.ERROR;
-                const errorResponse = action.payload.response;
-                if (errorResponse && errorResponse.status === 404) {
-                    state.isLoggedIn = false;
-                    toast.error('User Does Not Exist.');
-                } else if (errorResponse && errorResponse.status === 401) {
-                    toast.error('Wrong Password.');
-                } else {
-                    toast.error('An error occurred during login.');
-                }
+                // if (!loginToken) {
+                //     toast.error("Session has been expired. Login again")
+                // }
+                // else if (errorResponse && errorResponse.status === 404) {
+                //     toast.error('User Does Not Exist.');
+                // } else if (errorResponse && errorResponse.status === 401) {
+                //     toast.error('Wrong Password.');
+                // } else {
+                toast.error('An error occurred during login.');
+                // }
             })
+        /* .addCase(logoutUser.pending, (state) => {
+            state.userStatus = STATUS.LOADING;
+        })
+        .addCase(logoutUser.fulfilled, (state, action) => {
+            state.user = action.payload;
+            state.userStatus = STATUS.SUCCEEDED;
+            toast.info('Logged Out Successfully')
+        })
+        .addCase(logoutUser.rejected, (state) => {
+            state.userStatus = STATUS.ERROR;
+        }) */
     }
 });
 

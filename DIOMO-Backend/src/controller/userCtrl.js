@@ -113,7 +113,7 @@ const loginUserCtrl = async (req, res) => {
                 lastname: findUser?.lastname,
                 email: findUser?.email,
                 mobile: findUser?.mobile,
-                token: generateToken(findUser?._id)
+                refreshToken: generateToken(findUser?._id)
             });
         } else {
             throw new Error("Invalid Credentials");

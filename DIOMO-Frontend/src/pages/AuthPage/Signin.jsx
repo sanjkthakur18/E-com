@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useCookies } from 'react-cookie';
 import { loginUser, selectUserStatus } from '../../store/authSlice';
 import { STATUS } from '../../utils/status';
 import Loader from '../../components/Loader/Loader';
@@ -12,6 +13,7 @@ const Signin = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [cookie, setCookie] = useCookies(['refreshToken']);
     const navigate = useNavigate();
 
     const handleChange = (evt) => {
@@ -21,31 +23,16 @@ const Signin = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        if (!formData.email || !formData.password) {
-            setError('Please enter the fields.');
-            return;
-        }
-
-        try {
-            const pendingProductId = localStorage.getItem('pendingProductId');
-            console.log(formData);
-            if (userStatus === STATUS.SUCCEEDED && pendingProductId) {
-                dispatch(loginUser(formData));
-                localStorage.removeItem('pendingProductId');
-                navigate(`/product/${pendingProductId}`);
-            } else {
-                dispatch(loginUser(formData));
-                navigate('/');
+        dispatch(loginUser(formData)).then(() => {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                console.log('Setting refreshToken cookie:', refreshToken);
+                setCookie('refreshToken', refreshToken);
+                const cookies = document.cookie;
+                console.log(cookies);
             }
-        } catch (error) {
-            console.log(error);
-            if (error.response && error.response.data && error.response.data.error) {
-                toast.error("Email already exists");
-            } else {
-                throw error;
-            }
-        }
+            navigate('/');
+        });
     };
 
     const handleShowPassword = () => {

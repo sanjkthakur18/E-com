@@ -1,24 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { useCookies } from 'react-cookie';
 import { BsFacebook, BsInstagram } from 'react-icons/bs';
-// import { selectUserStatus, logoutUser, selectUser } from '../../store/authSlice';
-// import { STATUS } from '../../utils/status';
+import { selectUserStatus, logoutUser } from '../../store/authSlice';
 import Navbar from "../Navbar/Navbar";
 import "./Header.scss";
 
 const Header = () => {
-  // const dispatch = useDispatch();
-  // const navigate = useNavigate();
-  // const userStatus = useSelector(selectUserStatus);
-  // const user = useSelector(selectUser);
-  // const firstName = user?.firstname;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') || false);
+  const [cookies, setCookie, removeCookie] = useCookies(['cookie-name']);
+  const userStatus = useSelector(selectUserStatus);
+  const firstName = localStorage.getItem('firstname');
+  const email = localStorage.getItem('email');
 
-  // const handleLogout = () => {
-  //   dispatch(logoutUser());
-  //   navigate('/');
-  // };
+  const handleLogout = () => {
+    dispatch(logoutUser()).then(() => {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken) {
+        console.log('Setting refreshToken cookie:', refreshToken);
+        localStorage.clear();
+        removeCookie('refreshToken', { path: '/', domain: 'localhost' });
+        const cookies = document.cookie;
+        console.log(cookies);;
+        navigate('/signin');
+      }
+    });
+  };
 
+  useEffect(() => {
+    const isLoggedIn = Boolean(email);
+    setIsLoggedIn(isLoggedIn);
+  }, [email]);
   return (
     <header className='header text-white'>
       <div className='container'>
@@ -52,12 +67,12 @@ const Header = () => {
               </ul>
             </div>
             <div className='header-cnt-top-r'>
-              {/* {userStatus === STATUS.SUCCEEDED ? (
+              {isLoggedIn ? (
                 <>
-                  <span className='top-link-itm-txt'>{firstName}</span>
-                  <button onClick={handleLogout} className='fs-6 text-white mx-3'>Signout</button>
+                  <span className='top-link-itm-txt fs-4'>{firstName}</span>
+                  <button onClick={handleLogout} className='fs-4 text-white mx-3'>Signout</button>
                 </>
-              ) : ( */}
+              ) : (
                 <ul className='top-links flex align-center'>
                   <li>
                     <Link to="/signup">
@@ -71,7 +86,7 @@ const Header = () => {
                     </Link>
                   </li>
                 </ul>
-              {/* )} */}
+              )}
             </div>
           </div>
           <div className='header-cnt-bottom'>

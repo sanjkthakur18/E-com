@@ -23,11 +23,23 @@ const Signin = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if (!formData.email || !formData.password) {
+            setError('Please enter the fields.');
+            dispatch({ type: 'auth/setError' });
+            return;
+        }
+        
         dispatch(loginUser(formData)).then(() => {
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
                 console.log('Setting refreshToken cookie:', refreshToken);
-                setCookie('refreshToken', refreshToken);
+                setCookie('refreshToken', refreshToken, {
+                    path: '/',
+                    expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+                    secure: true,
+                    sameSite: 'strict',
+                });
                 const cookies = document.cookie;
                 console.log(cookies);
             }

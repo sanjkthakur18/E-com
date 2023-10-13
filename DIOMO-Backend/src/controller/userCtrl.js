@@ -144,7 +144,7 @@ const handleRefreshToken = async (req, res) => {
 const logout = async (req, res) => {
     const cookie = req.cookies;
     try {
-        if (!cookie?.refreshToken) throw new Error("No Refresh Token in Cookies");
+        // if (!cookie?.refreshToken) throw new Error("No Refresh Token in Cookies");
         const refreshToken = cookie.refreshToken;
         const user = await User.findOne({ refreshToken });
         if (!user) {
@@ -157,8 +157,8 @@ const logout = async (req, res) => {
         await User.findOneAndUpdate({ refreshToken: refreshToken }, {
             refreshToken: "",
         });
+        await user.save();
         res.clearCookie("refreshToken", {
-            httpOnly: true,
             secure: true,
         });
         res.sendStatus(204);

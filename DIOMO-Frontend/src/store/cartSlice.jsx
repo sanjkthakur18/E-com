@@ -1,38 +1,22 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { AUTH_URL } from "../utils/apiURL";
-import { STATUS } from "../utils/status";
-import { loginUser, selectUserStatus } from "./authSlice";
+import { createSlice } from "@reduxjs/toolkit";
+import { getProductSingle, getSingleProductStatus } from "./productSlice";
+import { STATUS } from '../utils/status';
 
-export const addProdToCart = createAsyncThunk(
-    'auth/cart/add',
-    async (cartData, { getState, dispatch }) => {
-        try {
-            const userStatus = selectUserStatus(getState());
-
-            if (userStatus === STATUS.SUCCEEDED) {
-                const response = await axios.post(`${AUTH_URL}users/cart`, cartData, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    },
-                });
-                console.log(response.data);
-                return response.data;
-            } else {
-                console.log('User is not logged in');
-                toast.error("You must be logged in to add items to the cart.");
-                return null;
-            }
-        } catch (error) {
-            console.log(error);
-            throw error;
-        }
+const fetchFromLocalStorage = () => {
+    let cart = localStorage.getItem('cart');
+    if (cart) {
+        return JSON.parse(localStorage.getItem('cart'));
+    } else {
+        return [];
     }
-);
+}
+
+const storeInLocalStorage = (data) => {
+    localStorage.setItem('cart', JSON.stringify(data));
+}
 
 const initialState = {
-    carts: [],
+    carts: fetchFromLocalStorage(),
     itemsCount: 0,
     totalAmount: 0,
     isCartMessageOn: false
@@ -43,61 +27,94 @@ const cartSlice = createSlice({
     initialState,
     reducers: {
         addToCart: (state, action) => {
-            const item = action.payload;
-            const existingItem = state.carts.find(item => item.id === action.payload.id);
+            const isItemInCart = state.carts.find(
+                (item) => item.productId === action.payload.productId
+            );
 
-            if (existingItem) {
-                existingItem.quantity += item.quantity;
-                existingItem.totalPrice = existingItem.quantity * existingItem.price;
-            } else {
-                state.carts.push(item);
+            const singleProductStatus = getSingleProductStatus(state);
+
+            if (singleProductStatus === STATUS.SUCCEEDED) {
+                if (isItemInCart) {
+                    state.carts = state.carts.map((item) => {
+                        if (item.productId === action.payload.productId) {
+                            const tempQty = item.quantity + 1;
+                            const tempTotalPrice = tempQty * item.product.discountedPrice;
+                            return {
+                                ...item,
+                                quantity: tempQty,
+                                totalPrice: tempTotalPrice
+                            };
+                        } else {
+                            return item;
+                        }
+                    });
+                } else {
+                    const newCartItem = {
+                        productId: action.payload.productId,
+                        quantity: 1,
+                        product: {
+                            title: getProductSingle(state).title,
+                            brand: getProductSingle(state).brand,
+                            rating: getProductSingle(state).rating,
+                            category: getProductSingle(state).category,
+                            price: getProductSingle(state).price,
+                            discountedPrice: getProductSingle(state).discountedPrice,
+                        },
+                        cartTotal: getProductSingle(state).discountedPrice,
+                        discountedPrice: getProductSingle(state).discountedPrice,
+                    };
+
+                    state.carts.push(newCartItem);
+                    storeInLocalStorage(state.carts);
+                }
             }
         },
 
         removeFromCart: (state, action) => {
-            const itemIdToRemove = action.payload;
-            state.carts = state.carts.filter(item => item.id !== itemIdToRemove);
+            const tempCart = state.carts.filter(item => item.id !== action.payload);
+            state.carts = tempCart;
+            storeInLocalStorage(state.carts);
         },
 
         clearCart: (state) => {
             state.carts = [];
+            storeInLocalStorage(state.carts);
         },
 
         getCartTotal: (state) => {
             state.totalAmount = state.carts.reduce((cartTotal, cartItem) => {
-                return cartTotal += cartItem.totalPrice;
+                return cartTotal += cartItem.totalPrice
             }, 0);
 
             state.itemsCount = state.carts.length;
         },
 
         toggleCartQty: (state, action) => {
-            const { id, type } = action.payload;
-            const itemToUpdate = state.carts.find(item => item.id === id);
+            const tempCart = state.carts.map(item => {
+                if (item.id === action.payload.id) {
+                    let tempQty = item.quantity;
+                    let tempTotalPrice = item.totalPrice;
 
-            if (itemToUpdate) {
-                let tempQty = itemToUpdate.quantity;
-                let tempTotalPrice = itemToUpdate.totalPrice;
+                    if (action.payload.type === "INC") {
+                        tempQty++;
+                        if (tempQty === item.stock) tempQty = item.stock;
+                        tempTotalPrice = tempQty * item.discountedPrice;
+                    }
 
-                if (type === "INC") {
-                    tempQty++;
-                    if (tempQty === itemToUpdate.stock) tempQty = itemToUpdate.stock;
-                    tempTotalPrice = tempQty * itemToUpdate.discountedPrice;
+                    if (action.payload.type === "DEC") {
+                        tempQty--;
+                        if (tempQty < 1) tempQty = 1;
+                        tempTotalPrice = tempQty * item.discountedPrice;
+                    }
+
+                    return { ...item, quantity: tempQty, totalPrice: tempTotalPrice };
+                } else {
+                    return item;
                 }
+            });
 
-                if (type === "DEC") {
-                    tempQty--;
-                    if (tempQty < 1) tempQty = 1;
-                    tempTotalPrice = tempQty * itemToUpdate.discountedPrice;
-                }
-
-                const updatedItem = { ...itemToUpdate, quantity: tempQty, totalPrice: tempTotalPrice };
-                const updatedCart = state.carts.map(item =>
-                    item.id === id ? updatedItem : item
-                );
-
-                state.carts = updatedCart;
-            }
+            state.carts = tempCart;
+            storeInLocalStorage(state.carts);
         },
 
         setCartMessageOn: (state) => {

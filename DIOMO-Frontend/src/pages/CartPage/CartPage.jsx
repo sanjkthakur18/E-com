@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {AiOutlineDelete} from 'react-icons/ai';
 import { shopping_cart } from '../../utils/images';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../utils/helpers';
@@ -67,16 +66,16 @@ const CartPage = () => {
                     </div>
                     <div className='cart-ctd'>
                       <div className='qty-change flex align-center'>
-                        <button type = "button" className='qty-decrease flex align-center justify-center fs-4 fw-normal' onClick={() => dispatch(toggleCartQty({id: cart?.id, type: "DEC"}))}>
-                          -
+                        <button type = "button" className='qty-decrease flex align-center justify-center' onClick={() => dispatch(toggleCartQty({id: cart?.id, type: "DEC"}))}>
+                          <i className='fas fa-minus'></i>
                         </button>
 
                         <div className='qty-value flex align-center justify-center'>
                           {cart?.quantity}
                         </div>
 
-                        <button type = "button" className='qty-increase flex align-center fs-4 fw-normal justify-center' onClick={() => dispatch(toggleCartQty({id: cart?.id, type: "INC"}))}>
-                          +
+                        <button type = "button" className='qty-increase flex align-center justify-center' onClick={() => dispatch(toggleCartQty({id: cart?.id, type: "INC"}))}>
+                          <i className='fas fa-plus'></i>
                         </button>
                       </div>
                     </div>
@@ -97,7 +96,7 @@ const CartPage = () => {
           <div className='cart-cfoot flex align-start justify-between py-3 bg-white'>
             <div className='cart-cfoot-l'>
               <button type='button' className='clear-cart-btn text-danger fs-15 text-uppercase fw-4' onClick={() => dispatch(clearCart())}>
-                <AiOutlineDelete />
+                <i className='fas fa-trash'></i>
                 <span className='mx-1'>Clear Cart</span>
               </button>
             </div>
@@ -114,7 +113,7 @@ const CartPage = () => {
         </div>
       </div>
     </div>
-  );
+  )
 };
 
 export default CartPage;

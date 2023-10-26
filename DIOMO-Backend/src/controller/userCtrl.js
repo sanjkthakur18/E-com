@@ -370,41 +370,42 @@ const getWishlist = async (req, res) => {
 
 // Cart
 const userCart = async (req, res) => {
-    const { cart, productId, quantity, price, totalAfterDiscount } = req.body;
+    const { productId, title, brand, rating, category, price, discountedPrice } = req.body;
     const { _id } = req.user;
     validateMongoId(_id);
+
     try {
-        let products = [];
-        const user = await User.findById(_id);
-        const alreadyExistCart = await Cart.findOne({ orderby: user._id });
-        if (alreadyExistCart) {
-            alreadyExistCart.remove();
-        }
-        for (let i = 0; i < cart.length; i++) {
-            let object = {};
-            object.product = cart[i]._id;
-            object.count = cart[i].count;
-            let getPrice = await Product.findById(cart[i]._id).select("price").exec();
-            object.price = getPrice.price;
-            products.push(object);
-        }
-        let cartTotal = 0;
-        for (let i = 0; i < products.length; i++) {
-            cartTotal = cartTotal + products[i].price * products[i].count;
-        }
-        let newCart = await new Cart({
+        let newCartItem = {
             userId: _id,
-            productId,
-            quantity,
-            cartTotal: price * quantity,
-            totalAfterDiscount,
-        }).save();
-        res.json(newCart);
+            items: [{
+                productId: productId,
+                quantity: 1,
+                product: {
+                    title: title,
+                    brand: brand,
+                    rating: rating,
+                    category: category,
+                    price: price,
+                    discountedPrice: discountedPrice
+                }
+            }],
+            cartTotal: price,
+            discountedPrice: discountedPrice
+
+        };
+        const user = await User.findById(_id);
+
+        user.cart.push(newCartItem);
+
+        await user.save();
+
+        res.json(newCartItem);
     } catch (error) {
         throw new Error(error);
     }
 };
-// User Cart
+
+// Get user cart
 const getUserCart = async (req, res) => {
     const { _id } = req.user;
     validateMongoId(_id);

@@ -1,26 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import {BsFillCartPlusFill} from 'react-icons/bs';
+import { BsFillCartPlusFill } from 'react-icons/bs';
+import { toast } from 'react-toastify';
 import { fetchAsyncProductSingle, getProductSingle, getSingleProductStatus } from '../../store/productSlice';
 import { STATUS } from '../../utils/status';
 import Loader from "../../components/Loader/Loader";
 import { formatPrice } from "../../utils/helpers";
-import { addToCart, getCartMessageStatus, setCartMessageOff, setCartMessageOn } from '../../store/cartSlice';
-import { selectUserStatus } from '../../store/authSlice';
+import { getCartMessageStatus, setCartMessageOff, setCartMessageOn } from '../../store/cartSlice';
+import { addProdToCart, selectCartStatus } from '../../store/authSlice';
 import CartMessage from "../../components/CartMessage/CartMessage";
-import { toast } from 'react-toastify';
 import "./ProductSinglePage.scss";
 
-const ProductSinglePage = () => {
+const ProductSinglePage = ({productId}) => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const product = useSelector(getProductSingle);
   const productSingleStatus = useSelector(getSingleProductStatus);
+  const cartStatus = useSelector(selectCartStatus);
   const [quantity, setQuantity] = useState(1);
   const cartMessageStatus = useSelector(getCartMessageStatus);
-  const userStatus = useSelector(selectUserStatus);
 
   useEffect(() => {
     dispatch(fetchAsyncProductSingle(id));
@@ -32,9 +31,13 @@ const ProductSinglePage = () => {
     }
   }, [cartMessageStatus]);
 
-  let discountedPrice = product?.price - (product?.price * (product?.discountPercentage / 100));
+  useEffect(() => {
+    dispatch(fetchAsyncProductSingle(id));
+  }, [dispatch, id]);
+
+  let discountedPrice = (product?.price) - (product?.price * (product?.discountPercentage / 100));
   if (productSingleStatus === STATUS.LOADING) {
-    return <Loader />;
+    return <Loader />
   }
 
   const increaseQty = () => {
@@ -54,17 +57,17 @@ const ProductSinglePage = () => {
   };
 
   const addToCartHandler = (product) => {
-    if (userStatus === STATUS.SUCCEEDED) {
-      let discountedPrice = product?.price - (product?.price * (product?.discountPercentage / 100));
-      let totalPrice = quantity * discountedPrice;
-
-      dispatch(addToCart({ ...product, quantity: quantity, totalPrice, discountedPrice }));
-      dispatch(setCartMessageOn(true));
-    } else {
-      localStorage.setItem('pendingProductId', id);
-      toast.error("Please login to to add product to cart.")
-      navigate("/signin", { state: { productId: id } });
-      console.log('User is not logged in. Please log in to add items to the cart.');
+    if (product) {
+      const cartItem = {
+        productId: product.id,
+        title: product.title,
+        brand: product.brand,
+        rating: product.rating,
+        category: product.category,
+        price: product.price,
+        discountedPrice: discountedPrice,
+      };
+      dispatch(addProdToCart(cartItem));
     }
   };
 
@@ -155,11 +158,11 @@ const ProductSinglePage = () => {
                 <div className='qty flex align-center my-4'>
                   <div className='qty-text'>Quantity:</div>
                   <div className='qty-change flex align-center mx-3'>
-                    <button type="button" className='qty-decrease flex align-center fa-5 fw-normal justify-center' onClick={() => decreaseQty()}>
+                    <button type="button" className='qty-decrease fs-3 flex align-center justify-center' onClick={() => decreaseQty()}>
                       -
                     </button>
                     <div className="qty-value flex align-center justify-center">{quantity}</div>
-                    <button type="button" className='qty-increase flex align-center fa-5 fw-normal justify-center' onClick={() => increaseQty()}>
+                    <button type="button" className='qty-increase fs-3 flex align-center justify-center' onClick={() => increaseQty()}>
                       +
                     </button>
                   </div>
@@ -185,7 +188,7 @@ const ProductSinglePage = () => {
 
       {cartMessageStatus && <CartMessage />}
     </main>
-  );
+  )
 };
 
 export default ProductSinglePage;

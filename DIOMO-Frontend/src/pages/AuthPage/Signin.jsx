@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
-import { loginUser, selectUserStatus } from '../../store/authSlice';
+import { loginUser, selectUserStatus, setUserLoggedIn } from '../../store/authSlice';
 import { STATUS } from '../../utils/status';
 import Loader from '../../components/Loader/Loader';
 import './AuthPage.scss';
@@ -40,6 +40,7 @@ const Signin = () => {
                     secure: true,
                     sameSite: 'strict',
                 });
+                dispatch(setUserLoggedIn());
                 const cookies = document.cookie;
                 console.log(cookies);
             }
